@@ -1,0 +1,34 @@
+{
+  "name": "addJS",
+  "version": "0.0.1",
+  "author": [{
+    "name": "xiaojue",
+    "email": "designsor@gmail.com",
+    "url": "http://tuer.me/user/profile/designsor"
+  }],
+  "description": "a javascript combine dev tools",
+  "keywords": [
+    "svn",
+    "http",
+    "combine",
+    "loader"
+  ],
+  "main": "./src/index.js",
+  "bin": {
+    "addJS": "src/index.js"
+  },
+  "dependencies": {
+    "uglify-js": "2.4.7",
+    "optimist": "0.6.0",
+    "commander": "*"
+  },
+  "devDependencies":{
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt":"*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xiaojue/addJS.git"
+  },
+  "license": "BSD"
+}
