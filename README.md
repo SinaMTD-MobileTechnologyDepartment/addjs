@@ -5,6 +5,10 @@ just combine js/css, support svn file and remote file
 
 #usage
 
+```bash
+$ npm install -g addJS
+```
+
 ```js
 //addJS source file
 require('./a.css');
