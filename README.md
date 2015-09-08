@@ -1,4 +1,4 @@
-# addJS
+# addjs
 just combine js/css, support svn file and remote file
 
 ----
@@ -6,7 +6,7 @@ just combine js/css, support svn file and remote file
 #usage
 
 ```bash
-$ npm install -g addJS
+$ npm install -g addjs
 ```
 
 ```js
@@ -25,11 +25,11 @@ require('http://cdn.xx.com/c.js');
 ```
 
 ```bash
-$ addJS server . //debug and real time combine like : http://127.0.0.1:7575/combine?file=/source.js
+$ addjs server . //debug and real time combine like : http://127.0.0.1:7575/combine?file=/source.js
 ```
 
 ```bash
-$ addJS build source.js ./dist --prename target --version 0.0.1
+$ addjs build source.js ./dist --prename target --version 0.0.1
 //output the css and js in target directory
 $ cd dist && ls
 $ target.min.js target.min.css target.config.js

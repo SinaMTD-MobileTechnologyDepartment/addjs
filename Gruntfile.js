@@ -16,8 +16,8 @@ module.exports = function(grunt) {
         banner: banner
       },
       files: {
-        src: 'addJS.js',
-        dest: 'addJS.min.js'
+        src: 'addjs.js',
+        dest: 'addjs.min.js'
       }
     }
   });
