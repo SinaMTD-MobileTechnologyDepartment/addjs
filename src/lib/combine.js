@@ -11,6 +11,8 @@ var combineTarget = require('./combineTarget');
 var svn = require('svn-interface');
 var through2 = require('through2');
 var Readable = require('stream').Readable;
+var uglify = require('uglify-stream');
+var cwd = process.cwd();
 
 function combine(svninfo) {
   this.svninfo = svninfo;
@@ -18,9 +20,10 @@ function combine(svninfo) {
 }
 
 utils.definePublicPros(combine.prototype, {
-  concat: function(filepath, keyword, ext, callback) {
+  concat: function(filepath, keyword, ext) {
     var line = new byline();
-    fs.createReadStream(filepath, {
+    this.deps = [];
+    return fs.createReadStream(filepath, {
         encoding: 'utf-8'
       })
       .pipe(line)
@@ -30,11 +33,26 @@ utils.definePublicPros(combine.prototype, {
         keyword: keyword,
         ext: ext,
         filepath: filepath
-      }))
-      .pipe(process.stdin)
-      .on('finish', callback);
+      }));
   }
 });
+
+combine.build = function(filepath,config,output,beautify){
+  var ext = path.extname(filepath),target;
+  var filestream = new combine({
+    username:config.svninfo.username,
+    password:config.svninfo.password,
+    command:config.svninfo.command
+  }).concat(filepath,config.keywords[ext],ext);
+  if(beautify){
+    target = path.resolve(cwd,beautify);
+    filestream.pipe(fs.createWriteStream(target));
+  }
+  if(output){
+    target = path.resolve(cwd,output); 
+    filestream.pipe(uglify()).pipe(fs.createWriteStream(target));
+  }
+};
 
 function pipeFile(file, params) {
   var line = new byline(),
@@ -106,16 +124,5 @@ function combineStream(params) {
     }
   });
 }
-
-
-var a = new combine({
-  username: '',
-  password: '',
-  command: 'svn17'
-});
-
-a.concat('/Users/chenchen/fuqiang/dev/addJS/test/js/a.js', '@require', '.js', function() {
-  console.log('end');
-});
 
 module.exports = combine;

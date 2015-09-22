@@ -1,6 +1,74 @@
 #!/usr/bin/env node
 var path = require('path');
-var fs = require('fs');
 var program = require('commander');
 var pkg = require('../package.json');
-var lib = require('../lib');
+var addjs = require('../src');
+var pwd = process.cwd();
+var readjsonsync = require('read-json-sync');
+var LOCALPATH = process.env.HOME || process.env.USERPROFILE;
+var addjsConfig = path.join(LOCALPATH, '.addjs/config.json');
+
+program.version(pkg.version);
+program.usage('[command] <args...> [options]');
+program.option('-c, --config <file>', 'default config will be install user directory in ~.addjs/config.json');
+program.option('-p, --port <port>', 'server will be listen port');
+program.option('-o, --output <file>', 'output fule');
+program.option('-b, --beautify <file>', 'beautify output/specify output options');
+program.option('--username <username>', 'set default svn username');
+program.option('--pwd <password>', 'set default svn password');
+program.option('--command <svncommand>', 'set default svn command new name');
+
+program.command('build <source>').description('build source js or css').action(function(source){
+  source = path.resolve(pwd, source);
+  if(!fs.existsSync(source)){
+   console.error('source must exists');
+   return; 
+  }
+  var ext = path.extname(source);
+  if(ext !== '.js' || ext !== '.css'){
+   console.error('only build js or css file');
+   return; 
+  }
+  if(program.output || program.beautify){
+    var config = getConfig();
+    addjs.combine.build(source,config,program.output,program.beautify);
+  }else{
+    console.error('build command must have -o or -b options');
+  }
+});
+
+program.command('server <path>').description('start the debug server current directory').action(function(dir){
+  dir = path.resolve(pwd,dir);
+  var config = getConfig();
+  addjs.server.start(dir,config,program.port);
+});
+
+program.command('svn').description('set default svninfo with --username,--pwd').action(function(){
+  if(program.username && program.pwd){
+    addjs.config.setSvn(program.username,program.pwd,program.command);
+  }else{
+    console.error('svn command must have --username or -password options');
+  }
+});
+
+program.command('info').description('show default svninfo').action(function(){
+  addjs.config.info();
+});
+
+program.parse(process.argv);
+var getConfig = function(){
+  var config = program.config ? path.resolve(pwd,program.config) : addjsConfig;
+  return function(){
+    return readConfig(config);
+  }
+}();
+
+function readConfig(jsonpath){
+  try{
+    return readjsonsync(jsonpath);
+  }catch(e){
+    console.error(e);
+  }
+}
+
+if (!program.args.length) program.help();

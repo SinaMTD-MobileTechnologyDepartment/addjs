@@ -17,15 +17,19 @@
   "bin": {
     "addJS": "src/index.js"
   },
+  "preinstall":"node .src/install.js",
   "dependencies": {
+    "express":"4.x",
     "through2":"*",
     "strip-comments":"*",
     "request":"*",
     "svn-interface":"*",
     "byline":"*",
     "fs-extra":"*",
-    "uglify-js": "2.4.7",
+    "uglify-stream": "*",
     "optimist": "0.6.0",
+    "read-json-sync":"*",
+    "jsonfile":"*",
     "commander": "*"
   },
   "devDependencies":{
