@@ -18,6 +18,12 @@
     "addJS": "src/index.js"
   },
   "dependencies": {
+    "through2":"*",
+    "strip-comments":"*",
+    "request":"*",
+    "svn-interface":"*",
+    "byline":"*",
+    "fs-extra":"*",
     "uglify-js": "2.4.7",
     "optimist": "0.6.0",
     "commander": "*"

@@ -17,9 +17,9 @@ $ npm install -g addjs
 
 ```js
 //addJS source file
-require('./a.js');
-require('svn:https://xxx.com.cn/b/trunk/b.js');
-require('http://cdn.xx.com/c.js');
+@require('./a.js');
+@require('svn:https://xxx.com.cn/b/trunk/b.js');
+@require('http://cdn.xx.com/c.js');
 ```
 
 ```html
