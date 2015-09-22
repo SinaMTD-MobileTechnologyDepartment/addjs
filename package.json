@@ -26,7 +26,7 @@
     "svn-interface":"*",
     "byline":"*",
     "fs-extra":"*",
-    "uglify-stream": "*",
+    "uglify-js": "*",
     "optimist": "0.6.0",
     "read-json-sync":"*",
     "jsonfile":"*",

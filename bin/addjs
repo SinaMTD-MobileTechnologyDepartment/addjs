@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 var path = require('path');
 var program = require('commander');
+var fs = require('fs-extra');
 var pkg = require('../package.json');
 var addjs = require('../src');
 var pwd = process.cwd();
@@ -25,7 +26,7 @@ program.command('build <source>').description('build source js or css').action(f
    return; 
   }
   var ext = path.extname(source);
-  if(ext !== '.js' || ext !== '.css'){
+  if(!(ext === '.js' || ext === '.css')){
    console.error('only build js or css file');
    return; 
   }
@@ -56,12 +57,11 @@ program.command('info').description('show default svninfo').action(function(){
 });
 
 program.parse(process.argv);
-var getConfig = function(){
+
+function getConfig(){
   var config = program.config ? path.resolve(pwd,program.config) : addjsConfig;
-  return function(){
-    return readConfig(config);
-  }
-}();
+  return readConfig(config);
+}
 
 function readConfig(jsonpath){
   try{

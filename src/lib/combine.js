@@ -11,7 +11,7 @@ var combineTarget = require('./combineTarget');
 var svn = require('svn-interface');
 var through2 = require('through2');
 var Readable = require('stream').Readable;
-var uglify = require('uglify-stream');
+var uglify = require('uglify-js');
 var cwd = process.cwd();
 
 function combine(svninfo) {
@@ -49,8 +49,19 @@ combine.build = function(filepath,config,output,beautify){
     filestream.pipe(fs.createWriteStream(target));
   }
   if(output){
-    target = path.resolve(cwd,output); 
-    filestream.pipe(uglify()).pipe(fs.createWriteStream(target));
+    target = path.resolve(cwd,output);
+    filestream.pipe(through2(function(chunk,enc,cb){
+      var code = chunk.toString();
+      this.code += code;
+      cb();
+    },function(cb){
+      //console.log(this.code);
+      var result = uglify.minify(this.code,{fromString:true});
+      this.push(result.code);
+      cb();
+    
+    })).pipe(fs.createWriteStream(target));
+    //filestream.pipe(uglify()).pipe(fs.createWriteStream(target));
   }
 };
 

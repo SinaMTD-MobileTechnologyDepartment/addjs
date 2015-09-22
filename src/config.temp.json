@@ -1,15 +1,15 @@
 {
- host:'127.0.0.1',
- port:7575,
- apiPath:'/combine',
- apiParam:'filename',
- svninfo:{
-   username:'',
-   password:'',
-   command:'svn'
+ "host":"127.0.0.1",
+ "port":7575,
+ "apiPath":"/combine",
+ "apiParam":"filename",
+ "svninfo":{
+   "username":"",
+   "password":"",
+   "command":"svn"
  },
- keywords:{
-  '.js':'@require',
-  '.css':'@import'
+ "keywords":{
+  ".js":"@require",
+  ".css":"@import"
  }
 }
