@@ -109,8 +109,8 @@ function combineStream(params) {
 
 
 var a = new combine({
-  username: 'fuqiang3',
-  password: 'Fuqiang1234QWER',
+  username: '',
+  password: '',
   command: 'svn17'
 });
 
