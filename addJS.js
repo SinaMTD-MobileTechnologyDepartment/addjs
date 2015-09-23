@@ -27,11 +27,11 @@
   }
 
   function writeScript(src) {
-    document.write('<script src="' + src + '"></script>');
+    doc.write('<script src="' + src + '"></script>');
   }
 
   function writeStyle(href) {
-    document.write('<link href="' + href + '" rel="stylesheet">');
+    doc.write('<link href="' + href + '" rel="stylesheet">');
   }
 
   function getConfig(cb) {
