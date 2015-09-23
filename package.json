@@ -1,6 +1,6 @@
 {
   "name": "addjs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": [{
     "name": "xiaojue",
     "email": "designsor@gmail.com",
@@ -13,25 +13,29 @@
     "combine",
     "loader"
   ],
+  "engines" : {
+    "node" : "<=0.12.4"
+  },
   "main": "./src/index.js",
   "bin": {
     "addJS": "src/index.js"
   },
-  "preinstall":"node .src/install.js",
+  "scripts":{
+    "preinstall":"node .src/install.js"
+  },
   "dependencies": {
-    "cssmin":"*",
+    "cssmin":"0.4.3",
     "express":"4.x",
-    "through2":"*",
-    "strip-comments":"*",
-    "request":"*",
-    "svn-interface":"*",
+    "through2":"2.0",
+    "request":"2.62.0",
+    "svn-interface":"0.4.6",
     "byline":"*",
-    "fs-extra":"*",
+    "fs-extra":"4.2.1",
     "uglify-js": "2.4.1",
     "optimist": "0.6.0",
-    "read-json-sync":"*",
-    "jsonfile":"*",
-    "commander": "*"
+    "read-json-sync":"1.1.0",
+    "jsonfile":"2.2.2",
+    "commander": "2.8.1"
   },
   "devDependencies":{
     "grunt-contrib-uglify": "~0.2.7",
