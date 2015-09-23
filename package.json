@@ -1,6 +1,6 @@
 {
   "name": "addjs",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "author": [{
     "name": "xiaojue",
     "email": "designsor@gmail.com",
@@ -18,7 +18,7 @@
   },
   "main": "./src/index.js",
   "bin": {
-    "addJS": "src/index.js"
+    "addjs": "bin/addjs"
   },
   "scripts":{
     "preinstall":"node ./src/install.js"
