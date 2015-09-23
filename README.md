@@ -30,7 +30,6 @@ $ npm install -g addjs
 <body>
   <script>addjs.js('http://cdn.x.cn/addjs/index.js')</script>
 </body>
--->
 ```
 
 ```js

@@ -10,15 +10,10 @@
     currentScript = scripts[scriptsLen - 1],
     configScript = currentScript.getAttribute('data-config'),
     Cache = currentScript.getAttribute('data-config-cache'),
-    timestamp = Date.now() / (parseInt(Cache, 10) * 60 * 1000);
+    timestamp = parseInt(Date.now() / (parseInt(Cache, 10) * 60 * 1000),10);
 
   function parseDebug() {
-    var path = location.pathname,
-      match = path.match('debug=(.*?)(&|$)');
-    if (match && match[1]) {
-      return match[1];
-    }
-    return null;
+    return (/debug/).test(location.search);
   }
 
   function switchFile(path) {
@@ -41,9 +36,7 @@
 
   function getConfig(cb) {
     writeScript(configScript + '?t=' + timestamp);
-    if (addjs.config) {
-      cb(addjs.config);
-    }
+    addjs.cbs.push(cb);
   }
 
   function addFile(path, func) {
@@ -56,6 +49,7 @@
   var addjs = {
     _debug: false,
     _configLoaded: false,
+    cbs: [],
     css: function(path) {
       addFile(path, writeStyle);
     },
@@ -63,6 +57,7 @@
       addFile(path, writeScript);
     },
     setConfig: function(options) {
+      var self = this;
       if (!options.version) {
         throw new Error('must have a version');
       }
@@ -70,6 +65,12 @@
         options.debugServer = 'http://127.0.0.1:7575/combine?filename=';
       }
       this.config = options;
+      this.cbs.forEach(function(func) {
+        if (!func.exec) {
+          func(self.config);
+          func.exec = true;
+        }
+      });
     }
   };
 

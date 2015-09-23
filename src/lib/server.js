@@ -31,7 +31,7 @@ function startServer(dir,options) {
   app.get(defaultOptions.apiPath, function(req, res, next) {
     if (req.query.hasOwnProperty(defaultOptions.apiParam)) {
       var filepath = req.query[defaultOptions.apiParam];
-      filepath = path.resolve(dir, filepath);
+      filepath = path.resolve(dir, filepath).replace(/\?.*$/g,'');
       var ext = path.extname(filepath);
       if (fs.existsSync(filepath) && (ext === '.js' || ext === '.css')) {
         var combineFile = new combine(defaultOptions.svninfo).concat(filepath, keywords[ext], ext);

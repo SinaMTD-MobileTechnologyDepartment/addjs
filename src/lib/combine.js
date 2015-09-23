@@ -5,6 +5,7 @@
 var utils = require('./utils');
 var path = require('path');
 var fs = require('fs');
+var cssmin = require('cssmin');
 var byline = require('byline').LineStream;
 var request = require('request');
 var combineTarget = require('./combineTarget');
@@ -52,16 +53,21 @@ combine.build = function(filepath,config,output,beautify){
     target = path.resolve(cwd,output);
     filestream.pipe(through2(function(chunk,enc,cb){
       var code = chunk.toString();
+      if(!this.code){
+        this.code = '';
+      }
       this.code += code;
       cb();
     },function(cb){
-      //console.log(this.code);
-      var result = uglify.minify(this.code,{fromString:true});
-      this.push(result.code);
+      var result;
+      if(ext === '.js'){
+        result = uglify.minify(this.code,{fromString:true}).code;
+      }else if(ext === '.css'){
+        result = cssmin(this.code);
+      }
+      this.push(result);
       cb();
-    
     })).pipe(fs.createWriteStream(target));
-    //filestream.pipe(uglify()).pipe(fs.createWriteStream(target));
   }
 };
 
@@ -101,7 +107,7 @@ function getRequireString(params) {
 function combineStream(params) {
   return through2(function(line, enc, cb) {
     var reg = new RegExp('^\\s*' + params.keyword + '\\s*\\(\\s*([\'|\"])([\\w\\-\\.\\/\\_\:]*)\\1\\s*\\)\\s*;?', 'gi');
-    line = line.toString() + '\n';
+    line = line.toString() + '\r\n';
     var matches = reg.exec(line);
     if (matches && matches[2]) {
       var requireName = matches[2];

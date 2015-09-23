@@ -19,6 +19,7 @@
   },
   "preinstall":"node .src/install.js",
   "dependencies": {
+    "cssmin":"*",
     "express":"4.x",
     "through2":"*",
     "strip-comments":"*",
@@ -26,7 +27,7 @@
     "svn-interface":"*",
     "byline":"*",
     "fs-extra":"*",
-    "uglify-js": "*",
+    "uglify-js": "2.4.1",
     "optimist": "0.6.0",
     "read-json-sync":"*",
     "jsonfile":"*",
