@@ -1,6 +1,6 @@
 {
   "name": "addjs",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "author": [{
     "name": "xiaojue",
     "email": "designsor@gmail.com",
@@ -30,7 +30,7 @@
     "request":"2.62.0",
     "svn-interface":"0.4.6",
     "byline":"*",
-    "fs-extra":"4.2.1",
+    "fs-extra":"0.24.0",
     "uglify-js": "2.4.1",
     "optimist": "0.6.0",
     "read-json-sync":"1.1.0",
