@@ -3,24 +3,15 @@
  * @fileoverview 前端加载脚本,更新时间戳，切换debug,加载css
  * @date 20150902
  */
-(function(win, doc, undef) {
+(function(win, doc) {
 
   var scripts = doc.getElementsByTagName('script'),
     scriptsLen = scripts.length,
     currentScript = scripts[scriptsLen - 1],
-    loadType = currentScript.getAttribute('data-type'),
     configScript = currentScript.getAttribute('data-config'),
-    confSrc = currentScript.getAttribute('data-conf'),
-    addjs = {
-      config: {},
-      debug: {
-        host: 'http://127.0.0.1',
-        port: '7575'
-      }
-    },
-    timestamp = Date.now() / 100;
+    Cache = currentScript.getAttribute('data-config-cache'),
+    timestamp = Date.now() / (parseInt(Cache, 10) * 60 * 1000);
 
-  //helpers
   function parseDebug() {
     var path = location.pathname,
       match = path.match('debug=(.*?)(&|$)');
@@ -30,48 +21,58 @@
     return null;
   }
 
-  function loadStyle(css) {
-    var node = document.createElement("link");
-    node.setAttribute("rel", "stylesheet");
-    node.setAttribute("type", "text/css");
-    node.setAttribute("href", css);
-    doc.querySelector('head').appendChild(node);
-  }
-
-  function loadScript(url, callback, charset) {
-    var node = doc.createElement('script');
-    node.onload = node.onerror = node.onreadystatechange = function() {
-      if ((/loaded|complete|undefined/).test(node.readyState)) {
-        node.onload = node.onerror = node.onreadystatechange = null;
-        if (node.parentNode) {
-          node.parentNode.removeChild(node);
-        }
-        node = undef;
-        if (callback) {
-          callback();
-        }
-      }
-    };
-    node.async = 'async';
-    charset = charset || 'utf-8';
-    node.charset = charset;
-    node.src = url;
-    doc.querySelector('head').appendChild(node);
-  }
-
-  function runScript() {
-    var debug = parseDebug();
-    if (debug) {
-      loadScript(addjs.debug.host + ':' + addjs.debug.port + '/combine?file=' + debug);
-    } Else {
-       var ver = addjs.config.timestamp ? '?t=' + addjs.config.timestamp : '';
-       loadScript(confSrc + ver);
+  function switchFile(path) {
+    var config = addjs.config,
+      debug = parseDebug();
+    if (debug && config.debugMap && config.debugMap[path]) {
+      return config.debugServer + config.debugMap[path];
+    } else {
+      return path;
     }
   }
 
-  runScript();
+  function writeScript(src) {
+    document.write('<script src="' + src + '"></script>');
+  }
+
+  function writeStyle(href) {
+    document.write('<link href="' + href + '" rel="stylesheet">');
+  }
+
+  function getConfig(cb) {
+    writeScript(configScript + '?t=' + timestamp);
+    if (addjs.config) {
+      cb(addjs.config);
+    }
+  }
+
+  function addFile(path, func) {
+    getConfig(function(config) {
+      path = switchFile(path);
+      func(path + '?v=' + config.version);
+    });
+  }
+
+  var addjs = {
+    _debug: false,
+    _configLoaded: false,
+    css: function(path) {
+      addFile(path, writeStyle);
+    },
+    js: function(path) {
+      addFile(path, writeScript);
+    },
+    setConfig: function(options) {
+      if (!options.version) {
+        throw new Error('must have a version');
+      }
+      if (!options.debugServer) {
+        options.debugServer = 'http://127.0.0.1:7575/combine?filename=';
+      }
+      this.config = options;
+    }
+  };
 
   win.addjs = addjs;
-  win.addjs.loadStyle = loadStyle;
 
 })(window, document);
