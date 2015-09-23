@@ -21,7 +21,7 @@
     "addJS": "src/index.js"
   },
   "scripts":{
-    "preinstall":"node .src/install.js"
+    "preinstall":"node ./src/install.js"
   },
   "dependencies": {
     "cssmin":"0.4.3",
