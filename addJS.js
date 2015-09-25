@@ -10,7 +10,7 @@
     currentScript = scripts[scriptsLen - 1],
     configScript = currentScript.getAttribute('data-config'),
     Cache = currentScript.getAttribute('data-config-cache'),
-    timestamp = parseInt(Date.now() / (parseInt(Cache, 10) * 60 * 1000),10);
+    timestamp = parseInt(Date.now() / (parseInt(Cache, 10) * 60 * 1000), 10);
 
   function parseDebug() {
     return (/debug/).test(location.search);
@@ -35,8 +35,12 @@
   }
 
   function getConfig(cb) {
-    writeScript(configScript + '?t=' + timestamp);
-    addjs.cbs.push(cb);
+    if (addjs.config) {
+      cb(addjs.config);
+    } else {
+      writeScript(configScript + '?t=' + timestamp);
+      addjs.cbs.push(cb);
+    }
   }
 
   function addFile(path, func) {
