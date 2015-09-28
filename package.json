@@ -1,11 +1,13 @@
 {
   "name": "addjs",
   "version": "0.0.9",
-  "author": [{
-    "name": "xiaojue",
-    "email": "designsor@gmail.com",
-    "url": "http://tuer.me/user/profile/designsor"
-  }],
+  "author": [
+    {
+      "name": "xiaojue",
+      "email": "designsor@gmail.com",
+      "url": "http://tuer.me/user/profile/designsor"
+    }
+  ],
   "description": "a javascript combine dev tools",
   "keywords": [
     "svn",
@@ -13,33 +15,35 @@
     "combine",
     "loader"
   ],
-  "engines" : {
-    "node" : "<=0.12.4"
+  "engines": {
+    "node": "<=0.12.4"
   },
   "main": "./src/index.js",
   "bin": {
     "addjs": "bin/addjs"
   },
-  "scripts":{
-    "preinstall":"node ./src/install.js"
+  "scripts": {
+    "preinstall": "node ./src/install.js"
   },
   "dependencies": {
-    "cssmin":"0.4.3",
-    "express":"4.x",
-    "through2":"2.0",
-    "request":"2.62.0",
-    "svn-interface":"0.4.6",
-    "byline":"*",
-    "fs-extra":"0.24.0",
-    "uglify-js": "2.4.1",
+    "babel-core": "5.8.25",
+    "byline": "4.2.1",
+    "commander": "2.8.1",
+    "cssmin": "0.4.3",
+    "express": "4.x",
+    "fs-extra": "0.24.0",
+    "jsonfile": "2.2.2",
+    "node-sass": "3.3.3",
     "optimist": "0.6.0",
-    "read-json-sync":"1.1.0",
-    "jsonfile":"2.2.2",
-    "commander": "2.8.1"
+    "read-json-sync": "1.1.0",
+    "request": "2.62.0",
+    "svn-interface": "0.4.6",
+    "through2": "2.0",
+    "uglify-js": "2.4.1"
   },
-  "devDependencies":{
+  "devDependencies": {
     "grunt-contrib-uglify": "~0.2.7",
-    "grunt":"*"
+    "grunt": "*"
   },
   "repository": {
     "type": "git",

@@ -14,10 +14,39 @@ var through2 = require('through2');
 var Readable = require('stream').Readable;
 var uglify = require('uglify-js');
 var cwd = process.cwd();
+var sass = require('node-sass');
+var babel = require('babel-core');
 
 function combine(svninfo) {
   this.svninfo = svninfo;
   this.deps = [];
+}
+
+function sassOrEs6(ext) {
+  function transform(chunk, enc, cb) {
+    if (!this.source) {
+      this.source = '';
+    }
+    this.source += chunk.toString();
+    cb();
+  }
+  var transformEnd;
+  if (ext === '.css') {
+    transformEnd = function(cb) {
+     var result = sass.renderSync({
+        data:this.source 
+     });
+     this.push(result.css);
+     cb();
+    };
+  } else if (ext === '.js') {
+    transformEnd = function(cb) {
+     var js = babel.transform(this.source);
+     this.push(js.code);
+     cb();
+    };
+  }
+  return through2(transform, transformEnd);
 }
 
 utils.definePublicPros(combine.prototype, {
@@ -34,35 +63,38 @@ utils.definePublicPros(combine.prototype, {
         keyword: keyword,
         ext: ext,
         filepath: filepath
-      }));
+      })).pipe(sassOrEs6(ext));
   }
 });
 
-combine.build = function(filepath,config,output,beautify){
-  var ext = path.extname(filepath),target;
+combine.build = function(filepath, config, output, beautify) {
+  var ext = path.extname(filepath),
+    target;
   var filestream = new combine({
-    username:config.svninfo.username,
-    password:config.svninfo.password,
-    command:config.svninfo.command
-  }).concat(filepath,config.keywords[ext],ext);
-  if(beautify){
-    target = path.resolve(cwd,beautify);
+    username: config.svninfo.username,
+    password: config.svninfo.password,
+    command: config.svninfo.command
+  }).concat(filepath, config.keywords[ext], ext);
+  if (beautify) {
+    target = path.resolve(cwd, beautify);
     filestream.pipe(fs.createWriteStream(target));
   }
-  if(output){
-    target = path.resolve(cwd,output);
-    filestream.pipe(through2(function(chunk,enc,cb){
+  if (output) {
+    target = path.resolve(cwd, output);
+    filestream.pipe(through2(function(chunk, enc, cb) {
       var code = chunk.toString();
-      if(!this.code){
+      if (!this.code) {
         this.code = '';
       }
       this.code += code;
       cb();
-    },function(cb){
+    }, function(cb) {
       var result;
-      if(ext === '.js'){
-        result = uglify.minify(this.code,{fromString:true}).code;
-      }else if(ext === '.css'){
+      if (ext === '.js') {
+        result = uglify.minify(this.code, {
+          fromString: true
+        }).code;
+      } else if (ext === '.css') {
         result = cssmin(this.code);
       }
       this.push(result);
