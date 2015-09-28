@@ -14,7 +14,7 @@ var through2 = require('through2');
 var Readable = require('stream').Readable;
 var uglify = require('uglify-js');
 var cwd = process.cwd();
-var sass = require('node-sass');
+var sass = require('sass.js');
 var babel = require('babel-core');
 
 var sourceMap = {};
@@ -35,11 +35,11 @@ function sassOrEs6(ext,filepath) {
   var transformEnd;
   if (ext === '.css') {
     transformEnd = function(cb) {
-     var result = sass.renderSync({
-        data:this.source 
+     var self = this;
+     sass.compile(this.source,function(result){
+      self.push(result.text);
+      cb();
      });
-     this.push(result.css);
-     cb();
     };
   } else if (ext === '.js') {
     transformEnd = function(cb) {
