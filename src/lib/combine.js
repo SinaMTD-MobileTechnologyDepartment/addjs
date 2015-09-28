@@ -17,12 +17,14 @@ var cwd = process.cwd();
 var sass = require('node-sass');
 var babel = require('babel-core');
 
+var sourceMap = {};
+
 function combine(svninfo) {
   this.svninfo = svninfo;
   this.deps = [];
 }
 
-function sassOrEs6(ext) {
+function sassOrEs6(ext,filepath) {
   function transform(chunk, enc, cb) {
     if (!this.source) {
       this.source = '';
@@ -41,7 +43,12 @@ function sassOrEs6(ext) {
     };
   } else if (ext === '.js') {
     transformEnd = function(cb) {
-     var js = babel.transform(this.source);
+     var js = babel.transform(this.source,{
+        blacklist:["useStrict"],
+        filename:path.basename(filepath),
+        sourceMaps:true 
+     });
+     sourceMap.babel = js.map;
      this.push(js.code);
      cb();
     };
@@ -63,7 +70,7 @@ utils.definePublicPros(combine.prototype, {
         keyword: keyword,
         ext: ext,
         filepath: filepath
-      })).pipe(sassOrEs6(ext));
+      })).pipe(sassOrEs6(ext,filepath));
   }
 });
 
@@ -91,9 +98,17 @@ combine.build = function(filepath, config, output, beautify) {
     }, function(cb) {
       var result;
       if (ext === '.js') {
-        result = uglify.minify(this.code, {
-          fromString: true
-        }).code;
+        var js = uglify.minify(this.code, {
+          fromString: true,
+          outSourceMap:path.basename(filepath) + '.map',
+          inSourceMap:sourceMap.babel
+        });
+        result = js.code;
+        sourceMap.uglify = JSON.parse(js.map);
+        sourceMap.uglify.sources = [path.basename(filepath)];
+        result = result.replace(/\/\/# .*$/gi,''); //outSourceMap will add
+        result += '\r\n//@ sourceMappingURL='+path.basename(filepath)+'.map';
+        fs.writeFileSync(filepath+'.map',JSON.stringify(sourceMap.uglify));
       } else if (ext === '.css') {
         result = cssmin(this.code);
       }

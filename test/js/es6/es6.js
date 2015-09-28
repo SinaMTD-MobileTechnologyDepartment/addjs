@@ -1,6 +1,10 @@
+@require("http://mjs.sinaimg.cn/wap/public/suda/201508061430/suda_log.min.js")
+
 var test = {
 
 };
+
+ale();
 
 (function(){
 
