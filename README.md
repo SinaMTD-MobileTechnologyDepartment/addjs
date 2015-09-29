@@ -1,5 +1,11 @@
 # addjs
-just combine js/css, support svn file and remote file
+just combine js/css.
+
+support svn file and remote file.
+
+support transform ES6 and scss to ES6 and css file.
+
+support source map debug ES6 source code.
 
 ----
 
@@ -45,8 +51,9 @@ addjs.setConfig({
 ```
 
 ```bash
-$ addjs build source.js -o target.js
-$ addjs build source.css -o target.css
+$ addjs build source.js -o target.min.js
+$ addjs build source.css -o target.min.css
+$ addjs build source.js -b beautify.js
 ```
 
 ```bash
