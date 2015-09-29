@@ -24,33 +24,32 @@ function combine(svninfo) {
   this.deps = [];
 }
 
-function sassOrEs6(ext,filepath) {
+function sassOrEs6(ext) {
   function transform(chunk, enc, cb) {
     if (!this.source) {
       this.source = '';
     }
-    this.source += chunk.toString();
+    this.source += chunk;
     cb();
   }
   var transformEnd;
   if (ext === '.css') {
     transformEnd = function(cb) {
-     var self = this;
-     sass.compile(this.source,function(result){
-      self.push(result.text);
-      cb();
-     });
+      var self = this;
+      sass.compile(this.source, function(result) {
+        self.push(result.text);
+        cb();
+      });
     };
   } else if (ext === '.js') {
     transformEnd = function(cb) {
-     var js = babel.transform(this.source,{
-        blacklist:["useStrict"],
-        filename:path.basename(filepath),
-        sourceMaps:true 
-     });
-     sourceMap.babel = js.map;
-     this.push(js.code);
-     cb();
+      var js = babel.transform(this.source, {
+        blacklist: ["useStrict"],
+        sourceMaps: true
+      });
+      sourceMap.babel = js.map;
+      this.push(js.code);
+      cb();
     };
   }
   return through2(transform, transformEnd);
@@ -70,7 +69,8 @@ utils.definePublicPros(combine.prototype, {
         keyword: keyword,
         ext: ext,
         filepath: filepath
-      })).pipe(sassOrEs6(ext,filepath));
+      }))
+      .pipe(sassOrEs6(ext));
   }
 });
 
@@ -84,37 +84,37 @@ combine.build = function(filepath, config, output, beautify) {
   }).concat(filepath, config.keywords[ext], ext);
   if (beautify) {
     target = path.resolve(cwd, beautify);
-    filestream.pipe(fs.createWriteStream(target));
+    filestream.pipe(fs.createWriteStream(target)).on('finish',function(){
+      console.log('beautify success: '+target); 
+    });
   }
   if (output) {
     target = path.resolve(cwd, output);
     filestream.pipe(through2(function(chunk, enc, cb) {
-      var code = chunk.toString();
       if (!this.code) {
         this.code = '';
       }
-      this.code += code;
+      this.code += chunk;
       cb();
     }, function(cb) {
       var result;
       if (ext === '.js') {
         var js = uglify.minify(this.code, {
           fromString: true,
-          outSourceMap:path.basename(filepath) + '.map',
-          inSourceMap:sourceMap.babel
+          inSourceMap: sourceMap.babel,
+          outSourceMap: path.basename(filepath) + '.map'
         });
         result = js.code;
         sourceMap.uglify = JSON.parse(js.map);
-        sourceMap.uglify.sources = [path.basename(filepath)];
-        result = result.replace(/\/\/# .*$/gi,''); //outSourceMap will add
-        result += '\r\n//@ sourceMappingURL='+path.basename(filepath)+'.map';
-        fs.writeFileSync(filepath+'.map',JSON.stringify(sourceMap.uglify));
+        fs.writeFileSync(filepath + '.map', JSON.stringify(sourceMap.uglify));
       } else if (ext === '.css') {
         result = cssmin(this.code);
       }
       this.push(result);
       cb();
-    })).pipe(fs.createWriteStream(target));
+    })).pipe(fs.createWriteStream(target)).on('finish',function(){
+      console.log('build output: '+target); 
+    });
   }
 };
 
@@ -125,8 +125,16 @@ function pipeFile(file, params) {
     .pipe(combineStream(params))
     .pipe(target)
     .on('finish', function() {
+      this.file = '\r\ntry{' + this.file + '}catch(e){throw new Error(e+" ' + params.errorFile + '");}\r\n';
       params.cb(null, this.file);
     });
+}
+
+function getRs(result) {
+  var rs = new Readable;
+  rs.push(result);
+  rs.push(null);
+  return rs;
 }
 
 function getRequireString(params) {
@@ -143,9 +151,10 @@ function getRequireString(params) {
       username: params.svninfo.username,
       password: params.svninfo.password
     }, function(err, result) {
-      var rs = new Readable;
-      rs.push(result);
-      rs.push(null);
+      if (err) {
+        throw new Error(err);
+      }
+      var rs = getRs(result);
       pipeFile(rs, params);
     });
   }
@@ -172,6 +181,7 @@ function combineStream(params) {
               ext: params.ext,
               type: type,
               filepath: type === 'local' ? path.resolve(path.dirname(params.filepath), requireName) : requireName,
+              errorFile:requireName,
               cb: cb
             });
           } else {
