@@ -3,7 +3,7 @@ just combine js/css.
 
 support svn file and remote file.
 
-support transform ES6 and scss to ES6 and css file.
+support transform ES6 and scss file.
 
 support source map debug ES6 source code.
 
