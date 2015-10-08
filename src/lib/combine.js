@@ -15,6 +15,7 @@ var Readable = require('stream').Readable;
 var uglify = require('uglify-js');
 var cwd = process.cwd();
 var sass = require('sass.js');
+var cssbeautify = require('cssbeautify');
 var babel = require('babel-core');
 
 var sourceMap = {};
@@ -24,7 +25,7 @@ function combine(svninfo) {
   this.deps = [];
 }
 
-function sassOrEs6(ext) {
+function sassOrEsOrEs66(ext) {
   function transform(chunk, enc, cb) {
     if (!this.source) {
       this.source = '';
@@ -36,17 +37,25 @@ function sassOrEs6(ext) {
   if (ext === '.css') {
     transformEnd = function(cb) {
       var self = this;
-      sass.compile(this.source, function(result) {
-        self.push(result.text);
-        cb();
+      console.log('beautify css...');
+      var css = cssbeautify(this.source);
+      console.log('compile css for sass...');
+      sass.compile(css, function(result) {
+        if (result.text) {
+          self.push(result.text);
+          cb();
+        } else {
+          cb(result);
+        }
       });
     };
   } else if (ext === '.js') {
     transformEnd = function(cb) {
+      console.log('babel js for es6...');
       var js = babel.transform(this.source, {
         blacklist: ["useStrict"],
-        compact:false,
-        sourceMaps: true
+        sourceMaps:true,
+        compact: false
       });
       sourceMap.babel = js.map;
       this.push(js.code);
@@ -60,7 +69,7 @@ utils.definePublicPros(combine.prototype, {
   concat: function(filepath, keyword, ext) {
     var line = new byline();
     this.deps = [];
-    return fs.createReadStream(filepath, {
+    var stream = fs.createReadStream(filepath, {
         encoding: 'utf-8'
       })
       .pipe(line)
@@ -71,7 +80,10 @@ utils.definePublicPros(combine.prototype, {
         ext: ext,
         filepath: filepath
       }))
-      .pipe(sassOrEs6(ext));
+      .pipe(sassOrEsOrEs66(ext)).on('error', function(e) {
+        console.error(e);
+      });
+    return stream;
   }
 });
 
@@ -85,8 +97,8 @@ combine.build = function(filepath, config, output, beautify) {
   }).concat(filepath, config.keywords[ext], ext);
   if (beautify) {
     target = path.resolve(cwd, beautify);
-    filestream.pipe(fs.createWriteStream(target)).on('finish',function(){
-      console.log('beautify success: '+target); 
+    filestream.pipe(fs.createWriteStream(target)).on('finish', function() {
+      console.info('beautify success: ' + target);
     });
   }
   if (output) {
@@ -100,21 +112,25 @@ combine.build = function(filepath, config, output, beautify) {
     }, function(cb) {
       var result;
       if (ext === '.js') {
-        var js = uglify.minify(this.code, {
+        console.log('minify js by uglify...');
+        var uglifyOptions = {
           fromString: true,
-          inSourceMap: sourceMap.babel,
           outSourceMap: path.basename(filepath) + '.map'
-        });
+        };
+        if(sourceMap.babel){
+          uglifyOptions.inSourceMap = sourceMap.babel;
+        }
+        var js = uglify.minify(this.code, uglifyOptions);
         result = js.code;
-        sourceMap.uglify = JSON.parse(js.map);
-        fs.writeFileSync(filepath + '.map', JSON.stringify(sourceMap.uglify));
+        fs.writeFileSync(filepath + '.map', js.map);
       } else if (ext === '.css') {
+        console.log('min css by cssmin...');
         result = cssmin(this.code);
       }
       this.push(result);
       cb();
-    })).pipe(fs.createWriteStream(target)).on('finish',function(){
-      console.log('build output: '+target); 
+    })).pipe(fs.createWriteStream(target)).on('finish', function() {
+      console.info('build output: ' + target);
     });
   }
 };
@@ -126,7 +142,13 @@ function pipeFile(file, params) {
     .pipe(combineStream(params))
     .pipe(target)
     .on('finish', function() {
-      this.file = '\r\ntry{' + this.file + '}catch(e){throw new Error(e+" ' + params.errorFile + '");}\r\n';
+      var ext = params.ext;
+      if (ext === '.js') {
+        this.file = '\r\ntry{' + this.file + '}catch(e){throw new Error(e+" ' + params.errorFile + '");}\r\n';
+      } else if (ext === '.css') {
+        this.file = '/*' + params.errorFile + '*/\r\n' + this.file;
+      }
+      console.log('finish dispose ' + params.errorFile + '...');
       params.cb(null, this.file);
     });
 }
@@ -139,12 +161,15 @@ function getRs(result) {
 }
 
 function getRequireString(params) {
+  console.log('start get ' + params.filepath + '...');
   if (params.type === 'local') {
     pipeFile(fs.createReadStream(params.filepath, {
       encoding: 'utf-8'
     }), params);
   } else if (params.type === 'http') {
-    pipeFile(request(params.filepath), params);
+    pipeFile(request(params.filepath).on('response', function(res) {
+      console.log(params.filepath + ' response code: ' + res.statusCode);
+    }), params);
   } else if (params.type === 'svn') {
     svn._setCommand(params.svninfo.command || 'svn');
     var filepath = params.filepath.replace(/^svn\:/, '');
@@ -182,7 +207,7 @@ function combineStream(params) {
               ext: params.ext,
               type: type,
               filepath: type === 'local' ? path.resolve(path.dirname(params.filepath), requireName) : requireName,
-              errorFile:requireName,
+              errorFile: requireName,
               cb: cb
             });
           } else {

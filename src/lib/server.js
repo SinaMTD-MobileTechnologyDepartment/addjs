@@ -48,8 +48,8 @@ function startServer(dir,options) {
     res.send('Illegal request');
   });
   app.listen(defaultOptions.port, defaultOptions.host, function() {
-    console.log('server start ' + defaultOptions.host + ':' + defaultOptions.port);
-    console.log('debug basepath: ' + dir);
+    console.info('server start ' + defaultOptions.host + ':' + defaultOptions.port);
+    console.info('debug basepath: ' + dir);
   });
 }
 

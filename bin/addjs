@@ -72,7 +72,7 @@ function readConfig(jsonpath){
 }
 
 process.on('uncaughtException',function(err){
-  console.log(err); 
+  console.dir(err); 
 });
 
 if (!program.args.length) program.help();
