@@ -25,7 +25,7 @@ function combine(svninfo) {
   this.deps = [];
 }
 
-function sassOrEsOrEs66(ext) {
+function sassOrEsOrEs66(ext, es6) {
   function transform(chunk, enc, cb) {
     if (!this.source) {
       this.source = '';
@@ -51,14 +51,18 @@ function sassOrEsOrEs66(ext) {
     };
   } else if (ext === '.js') {
     transformEnd = function(cb) {
-      console.log('babel js for es6...');
-      var js = babel.transform(this.source, {
-        blacklist: ["useStrict"],
-        sourceMaps:true,
-        compact: false
-      });
-      sourceMap.babel = js.map;
-      this.push(js.code);
+      if (es6) {
+        console.log('babel js for es6...');
+        var js = babel.transform(this.source, {
+          blacklist: ["useStrict"],
+          sourceMaps: true,
+          compact: false
+        });
+        sourceMap.babel = js.map;
+        this.push(js.code);
+      } else {
+        this.push(this.source);
+      }
       cb();
     };
   }
@@ -66,7 +70,7 @@ function sassOrEsOrEs66(ext) {
 }
 
 utils.definePublicPros(combine.prototype, {
-  concat: function(filepath, keyword, ext) {
+  concat: function(filepath, keyword, ext, es6) {
     var line = new byline();
     this.deps = [];
     var stream = fs.createReadStream(filepath, {
@@ -80,21 +84,21 @@ utils.definePublicPros(combine.prototype, {
         ext: ext,
         filepath: filepath
       }))
-      .pipe(sassOrEsOrEs66(ext)).on('error', function(e) {
+      .pipe(sassOrEsOrEs66(ext, es6)).on('error', function(e) {
         console.error(e);
       });
     return stream;
   }
 });
 
-combine.build = function(filepath, config, output, beautify) {
+combine.build = function(filepath, config, output, beautify, es6) {
   var ext = path.extname(filepath),
     target;
   var filestream = new combine({
     username: config.svninfo.username,
     password: config.svninfo.password,
     command: config.svninfo.command
-  }).concat(filepath, config.keywords[ext], ext);
+  }).concat(filepath, config.keywords[ext], ext, es6);
   if (beautify) {
     target = path.resolve(cwd, beautify);
     filestream.pipe(fs.createWriteStream(target)).on('finish', function() {
@@ -117,7 +121,7 @@ combine.build = function(filepath, config, output, beautify) {
           fromString: true,
           outSourceMap: path.basename(filepath) + '.map'
         };
-        if(sourceMap.babel){
+        if (sourceMap.babel) {
           uglifyOptions.inSourceMap = sourceMap.babel;
         }
         var js = uglify.minify(this.code, uglifyOptions);

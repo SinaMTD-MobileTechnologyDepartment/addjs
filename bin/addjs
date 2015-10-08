@@ -15,6 +15,7 @@ program.option('-c, --config <file>', 'default config will be install user direc
 program.option('-p, --port <port>', 'server will be listen port');
 program.option('-o, --output <file>', 'output fule');
 program.option('-b, --beautify <file>', 'beautify output/specify output options');
+program.option('-e, --es6', 'transform es6 to es5 js source');
 program.option('--username <username>', 'set default svn username');
 program.option('--pwd <password>', 'set default svn password');
 program.option('--command <svncommand>', 'set default svn command new name');
@@ -32,7 +33,7 @@ program.command('build <source>').description('build source js or css').action(f
   }
   if(program.output || program.beautify){
     var config = getConfig();
-    addjs.combine.build(source,config,program.output,program.beautify);
+    addjs.combine.build(source,config,program.output,program.beautify,program.es6);
   }else{
     console.error('build command must have -o or -b options');
   }

@@ -18,7 +18,7 @@ var KEYWORDS = {
   '.css': '@require'
 };
 
-function startServer(dir,options) {
+function startServer(dir, options) {
   options = options || {};
   var defaultOptions = {
     host: options.host || '127.0.0.1',
@@ -31,10 +31,11 @@ function startServer(dir,options) {
   app.get(defaultOptions.apiPath, function(req, res, next) {
     if (req.query.hasOwnProperty(defaultOptions.apiParam)) {
       var filepath = req.query[defaultOptions.apiParam];
-      filepath = path.resolve(dir, filepath).replace(/\?.*$/g,'');
+      filepath = path.resolve(dir, filepath).replace(/\?.*$/g, '');
       var ext = path.extname(filepath);
       if (fs.existsSync(filepath) && (ext === '.js' || ext === '.css')) {
-        var combineFile = new combine(defaultOptions.svninfo).concat(filepath, keywords[ext], ext);
+        var es6 = req.query.es6 ? true : false;
+        var combineFile = new combine(defaultOptions.svninfo).concat(filepath, keywords[ext], ext, es6);
         res.header('Content-Type', ContentType[ext]);
         combineFile.pipe(res);
       } else {
@@ -53,12 +54,12 @@ function startServer(dir,options) {
   });
 }
 
-startServer.start = function(dir,config,port){
+startServer.start = function(dir, config, port) {
   config.port = port ? port : config.port;
-  startServer(dir,{
-    port:config.port,
-    svninfo:config.svninfo,
-    keywords:config.keywords
+  startServer(dir, {
+    port: config.port,
+    svninfo: config.svninfo,
+    keywords: config.keywords
   });
 };
 
