@@ -7,6 +7,10 @@ support transform ES6 and scss file.
 
 support source map debug ES6 source code.
 
+chinese documentation: [中文文档][1]
+
+  [1]: ./zh.md
+
 ----
 
 #usage
