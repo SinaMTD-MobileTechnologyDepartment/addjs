@@ -21,18 +21,21 @@ $ npm install -g addjs
 ```
 
 ```css
+//css源码
 @import('./a.css');
 @import('svn:https://xxx.com.cn/b/trunk/b.css');
 @import('http://cnd.xx.com/c.css');
 ```
 
 ```js
+//js源码
 @require('./a.js');
 @require('svn:https://xxx.com.cn/b/trunk/b.js');
 @require('http://cdn.xx.com/c.js');
 ```
 
 ```html
+//前端加载代码,config-cache 配置文件更新时间戳频率，分钟为单位
 <head>
   <script src="addjs.js" data-config="config.js" data-config-cache="10"></script>
   <script>addjs.css('http://cdn.x.cn/addjs/index.css')</script>
@@ -43,7 +46,7 @@ $ npm install -g addjs
 ```
 
 ```js
-//config.js
+//config.js配置文件参数version为必填，debugMap为debugServer使用，对线上资源进行本地debug server的转发
 addjs.setConfig({
   debugServer:'http:127.0.0.1:7575/',
   debugMap:{
@@ -55,6 +58,7 @@ addjs.setConfig({
 ```
 
 ```bash
+//命令行详解
 $ addjs --help
 
   Usage: addjs [command] <args...> [options]
@@ -84,12 +88,14 @@ $ addjs --help
 ```
 
 ```bash
+//打包压缩事例
 $ addjs build source.js -o target.min.js
 $ addjs build source.css -o target.min.css
 $ addjs build source.js -b beautify.js
 ```
 
 ```bash
+//启动./为debug server目录,默认7575端口
 $ addjs server ./ --port 7575 //debug and real time combine like : http://127.0.0.1:7575/combine?filename=/path/source.js
 ```
 
