@@ -51,6 +51,33 @@ addjs.setConfig({
 ```
 
 ```bash
+$ addjs --help
+
+  Usage: addjs [command] <args...> [options]
+
+
+  Commands:
+
+    build <source>  build source js or css
+    server <path>   start the debug server current directory
+    svn             set default svninfo with --username,--pwd
+    info            show default svninfo
+
+  Options:
+
+    -h, --help              output usage information
+    -V, --version           output the version number
+    -c, --config <file>     default config will be install user directory in ~.addjs/config.json
+    -p, --port <port>       server will be listen port
+    -o, --output <file>     output fule
+    -b, --beautify <file>   beautify output/specify output options
+    -e, --es6               transform es6 to es5 js source
+    --username <username>   set default svn username
+    --pwd <password>        set default svn password
+    --command <svncommand>  set default svn command new name
+```
+
+```bash
 $ addjs build source.js -o target.min.js
 $ addjs build source.css -o target.min.css
 $ addjs build source.js -b beautify.js
@@ -59,3 +86,5 @@ $ addjs build source.js -b beautify.js
 ```bash
 $ addjs server ./ --port 7575 //debug and real time combine like : http://127.0.0.1:7575/combine?filename=/path/source.js
 ```
+
+ES6 combine url flag option default is false, if you want combine es6 file real time, set the es6 options true.
