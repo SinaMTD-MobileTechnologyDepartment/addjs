@@ -39,8 +39,8 @@ function sassOrEsOrEs66(ext, es6, toSass) {
       var self = this;
       console.log('beautify css...');
       var css = cssbeautify(this.source);
-      console.log('compile css for sass...');
       if (toSass) {
+        console.log('compile css for sass...');
         sass.compile(css, function(result) {
           if (result.text) {
             self.push(result.text);
@@ -155,7 +155,7 @@ function pipeFile(file, params) {
       if (ext === '.js') {
         this.file = '\r\ntry{' + this.file + '}catch(e){throw new Error(e+" ' + params.errorFile + '");}\r\n';
       } else if (ext === '.css') {
-        this.file = '/*' + params.errorFile + '*/\r\n' + this.file;
+        this.file = this.file + '/*' + params.errorFile + '*/ \r\n';
       }
       console.log('finish dispose ' + params.errorFile + '...');
       params.cb(null, this.file);

@@ -32,10 +32,10 @@
     var config = addjs.config,
       debug = parseDebug();
     if (debug && config.debugMap && config.debugMap[path]) {
-      var debugpath = config.debugServer + config.debugMap[path];
-      debugpath = parseSass() ? debugpath + '&sass=1' : debugpath;
-      debugpath = parseES6() ? debugpath + '&es6=1' : debugpath;
-      return debugpath;
+      var debugPath = config.debugServer + config.debugMap[path];
+      debugPath = parseSass() ? debugPath + '&sass=1' : debugPath;
+      debugPath = parseES6() ? debugPath + '&es6=1' : debugPath;
+      return debugPath;
     } else {
       return path;
     }
@@ -61,7 +61,8 @@
   function addFile(path, func) {
     getConfig(function(config) {
       path = switchFile(path);
-      func(path + '?v=' + config.version);
+      path = parseDebug() ? path : path + '?v=' + config.version;
+      func(path);
     });
   }
 
