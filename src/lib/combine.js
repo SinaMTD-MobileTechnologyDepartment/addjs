@@ -45,6 +45,7 @@ function sassOrEs6(ext) {
     transformEnd = function(cb) {
       var js = babel.transform(this.source, {
         blacklist: ["useStrict"],
+        compact:false,
         sourceMaps: true
       });
       sourceMap.babel = js.map;
