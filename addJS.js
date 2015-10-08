@@ -12,15 +12,30 @@
     Cache = currentScript.getAttribute('data-config-cache'),
     timestamp = parseInt(Date.now() / (parseInt(Cache, 10) * 60 * 1000), 10);
 
+  function parseUrl(reg) {
+    return (reg).test(location.search);
+  }
+
   function parseDebug() {
-    return (/debug/).test(location.search);
+    return parseUrl(/debug/);
+  }
+
+  function parseSass() {
+    return parseUrl(/sass/);
+  }
+
+  function parseES6() {
+    return parseUrl(/es6/);
   }
 
   function switchFile(path) {
     var config = addjs.config,
       debug = parseDebug();
     if (debug && config.debugMap && config.debugMap[path]) {
-      return config.debugServer + config.debugMap[path];
+      var debugpath = config.debugServer + config.debugMap[path];
+      debugpath = parseSass() ? debugpath + '&sass=1' : debugpath;
+      debugpath = parseES6() ? debugpath + '&es6=1' : debugpath;
+      return debugpath;
     } else {
       return path;
     }
