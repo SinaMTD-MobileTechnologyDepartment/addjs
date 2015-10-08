@@ -72,9 +72,11 @@ $ addjs --help
     -o, --output <file>     output fule
     -b, --beautify <file>   beautify output/specify output options
     -e, --es6               transform es6 to es5 js source
+    -s, --sass              transform sass to css source
     --username <username>   set default svn username
     --pwd <password>        set default svn password
     --command <svncommand>  set default svn command new name
+
 ```
 
 ```bash
@@ -87,4 +89,4 @@ $ addjs build source.js -b beautify.js
 $ addjs server ./ --port 7575 //debug and real time combine like : http://127.0.0.1:7575/combine?filename=/path/source.js
 ```
 
-ES6 combine url flag option default is false, if you want combine es6 file real time, set the es6 options true.
+the combine url flag option default is false, if you want combine es6 or sass file combine real time, set the options true.

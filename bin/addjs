@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 var path = require('path');
 var program = require('commander');
 var fs = require('fs-extra');
@@ -16,64 +17,65 @@ program.option('-p, --port <port>', 'server will be listen port');
 program.option('-o, --output <file>', 'output fule');
 program.option('-b, --beautify <file>', 'beautify output/specify output options');
 program.option('-e, --es6', 'transform es6 to es5 js source');
+program.option('-s, --sass', 'transform sass to css source');
 program.option('--username <username>', 'set default svn username');
 program.option('--pwd <password>', 'set default svn password');
 program.option('--command <svncommand>', 'set default svn command new name');
 
-program.command('build <source>').description('build source js or css').action(function(source){
+program.command('build <source>').description('build source js or css').action(function(source) {
   source = path.resolve(pwd, source);
-  if(!fs.existsSync(source)){
-   console.error('source must exists');
-   return; 
+  if (!fs.existsSync(source)) {
+    console.error('source must exists');
+    return;
   }
   var ext = path.extname(source);
-  if(!(ext === '.js' || ext === '.css')){
-   console.error('only build js or css file');
-   return; 
+  if (!(ext === '.js' || ext === '.css')) {
+    console.error('only build js or css file');
+    return;
   }
-  if(program.output || program.beautify){
+  if (program.output || program.beautify) {
     var config = getConfig();
-    addjs.combine.build(source,config,program.output,program.beautify,program.es6);
-  }else{
+    addjs.combine.build(source, config, program.output, program.beautify, program.es6, program.sass);
+  } else {
     console.error('build command must have -o or -b options');
   }
 });
 
-program.command('server <path>').description('start the debug server current directory').action(function(dir){
-  dir = path.resolve(pwd,dir);
+program.command('server <path>').description('start the debug server current directory').action(function(dir) {
+  dir = path.resolve(pwd, dir);
   var config = getConfig();
-  addjs.server.start(dir,config,program.port);
+  addjs.server.start(dir, config, program.port);
 });
 
-program.command('svn').description('set default svninfo with --username,--pwd').action(function(){
-  if(program.username && program.pwd){
-    addjs.config.setSvn(program.username,program.pwd,program.command);
-  }else{
+program.command('svn').description('set default svninfo with --username,--pwd').action(function() {
+  if (program.username && program.pwd) {
+    addjs.config.setSvn(program.username, program.pwd, program.command);
+  } else {
     console.error('svn command must have --username or -password options');
   }
 });
 
-program.command('info').description('show default svninfo').action(function(){
+program.command('info').description('show default svninfo').action(function() {
   addjs.config.info();
 });
 
 program.parse(process.argv);
 
-function getConfig(){
-  var config = program.config ? path.resolve(pwd,program.config) : addjsConfig;
+function getConfig() {
+  var config = program.config ? path.resolve(pwd, program.config) : addjsConfig;
   return readConfig(config);
 }
 
-function readConfig(jsonpath){
-  try{
+function readConfig(jsonpath) {
+  try {
     return readjsonsync(jsonpath);
-  }catch(e){
+  } catch (e) {
     console.error(e);
   }
 }
 
-process.on('uncaughtException',function(err){
-  console.dir(err); 
+process.on('uncaughtException', function(err) {
+  console.dir(err);
 });
 
 if (!program.args.length) program.help();

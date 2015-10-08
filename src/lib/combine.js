@@ -25,7 +25,7 @@ function combine(svninfo) {
   this.deps = [];
 }
 
-function sassOrEsOrEs66(ext, es6) {
+function sassOrEsOrEs66(ext, es6, toSass) {
   function transform(chunk, enc, cb) {
     if (!this.source) {
       this.source = '';
@@ -40,14 +40,19 @@ function sassOrEsOrEs66(ext, es6) {
       console.log('beautify css...');
       var css = cssbeautify(this.source);
       console.log('compile css for sass...');
-      sass.compile(css, function(result) {
-        if (result.text) {
-          self.push(result.text);
-          cb();
-        } else {
-          cb(result);
-        }
-      });
+      if (toSass) {
+        sass.compile(css, function(result) {
+          if (result.text) {
+            self.push(result.text);
+            cb();
+          } else {
+            cb(result);
+          }
+        });
+      } else {
+        this.push(css);
+        cb();
+      }
     };
   } else if (ext === '.js') {
     transformEnd = function(cb) {
@@ -70,7 +75,7 @@ function sassOrEsOrEs66(ext, es6) {
 }
 
 utils.definePublicPros(combine.prototype, {
-  concat: function(filepath, keyword, ext, es6) {
+  concat: function(filepath, keyword, ext, es6, toSass) {
     var line = new byline();
     this.deps = [];
     var stream = fs.createReadStream(filepath, {
@@ -84,21 +89,21 @@ utils.definePublicPros(combine.prototype, {
         ext: ext,
         filepath: filepath
       }))
-      .pipe(sassOrEsOrEs66(ext, es6)).on('error', function(e) {
+      .pipe(sassOrEsOrEs66(ext, es6, toSass)).on('error', function(e) {
         console.error(e);
       });
     return stream;
   }
 });
 
-combine.build = function(filepath, config, output, beautify, es6) {
+combine.build = function(filepath, config, output, beautify, es6, toSass) {
   var ext = path.extname(filepath),
     target;
   var filestream = new combine({
     username: config.svninfo.username,
     password: config.svninfo.password,
     command: config.svninfo.command
-  }).concat(filepath, config.keywords[ext], ext, es6);
+  }).concat(filepath, config.keywords[ext], ext, es6, toSass);
   if (beautify) {
     target = path.resolve(cwd, beautify);
     filestream.pipe(fs.createWriteStream(target)).on('finish', function() {

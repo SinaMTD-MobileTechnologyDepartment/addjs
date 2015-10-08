@@ -35,7 +35,8 @@ function startServer(dir, options) {
       var ext = path.extname(filepath);
       if (fs.existsSync(filepath) && (ext === '.js' || ext === '.css')) {
         var es6 = req.query.es6 ? true : false;
-        var combineFile = new combine(defaultOptions.svninfo).concat(filepath, keywords[ext], ext, es6);
+        var sass = req.query.sass ? true : false;
+        var combineFile = new combine(defaultOptions.svninfo).concat(filepath, keywords[ext], ext, es6, sass);
         res.header('Content-Type', ContentType[ext]);
         combineFile.pipe(res);
       } else {
