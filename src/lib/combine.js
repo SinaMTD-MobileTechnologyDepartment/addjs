@@ -131,7 +131,13 @@ combine.build = function(filepath, config, output, beautify, es6, toSass) {
         }
         var js = uglify.minify(this.code, uglifyOptions);
         result = js.code;
-        fs.writeFileSync(filepath + '.map', js.map);
+        js.map = JSON.parse(js.map);
+        js.map.file  = 'unknown';
+        js.map.sources[0] = 'unknown';
+        if(!js.map.sourcesContent){
+           js.map.sourcesContent = [this.code];
+        }
+        fs.writeFileSync(filepath + '.map', JSON.stringify(js.map));
       } else if (ext === '.css') {
         console.log('min css by cssmin...');
         result = cssmin(this.code);
