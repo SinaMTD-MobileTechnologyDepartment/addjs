@@ -9,5 +9,5 @@ if(!fs.existsSync(addjsConfig)){
   if(!fs.existsSync(dirname)){
     fs.mkdirSync(dirname); 
   }
-  fs.linkSync(configTemp,addjsConfig);
+  fs.writeFileSync(addjsConfig,fs.readFileSync(configTemp));
 }
