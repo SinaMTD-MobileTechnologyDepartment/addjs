@@ -6,6 +6,7 @@ var utils = require('./utils');
 var path = require('path');
 var fs = require('fs');
 var cssmin = require('cssmin');
+var URLRewriteStream = require('cssurl').URLRewriteStream;
 var byline = require('byline').LineStream;
 var request = require('request');
 var combineTarget = require('./combineTarget');
@@ -23,6 +24,24 @@ var sourceMap = {};
 function combine(svninfo) {
   this.svninfo = svninfo;
   this.deps = [];
+}
+
+function urlRewrite(filepath, cnf) {
+  cnf = cnf || {};
+  cnf.exts = cnf.exts || ['.css'];
+  cnf.online = cnf.online || /http(s?)/i;
+  cnf.replacer = cnf.replacer || path.dirname(filepath);
+  //cnf.replacers = cnf.replacers.split('/');
+
+  var urlRewriteIns = new URLRewriteStream(function(url){
+    console.log('find '+ url + ' for rewrite!');
+    if(!cnf.online.test(url)){
+       url = cnf.replacer + '/' + url;
+       return url += (url.indexOf('?') === -1 ? '?' : '&') + 't='+Date.now();
+    }
+    return url;
+  });
+  return cnf.exts.indexOf(path.extname(filepath)) !== -1 ? urlRewriteIns : through2(function(chunk, enc, cb){this.push(chunk);cb()});
 }
 
 function sassOrEsOrEs66(ext, es6, toSass) {
@@ -184,7 +203,7 @@ function getRequireString(params) {
   } else if (params.type === 'http') {
     pipeFile(request(params.filepath).on('response', function(res) {
       console.log(params.filepath + ' response code: ' + res.statusCode);
-    }), params);
+    }).pipe(urlRewrite(params.filepath)), params);
   } else if (params.type === 'svn') {
     svn._setCommand(params.svninfo.command || 'svn');
     var filepath = params.filepath.replace(/^svn\:/, '');
