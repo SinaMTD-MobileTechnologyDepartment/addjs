@@ -42,7 +42,7 @@
     "svn-interface": "0.4.6",
     "through2": "2.0",
     "uglify-js": "2.4.24",
-    "cssurl": "1.3.0",
+    "cssurl": "1.3.0"
   },
   "devDependencies": {
     "grunt-contrib-uglify": "~0.2.7",
